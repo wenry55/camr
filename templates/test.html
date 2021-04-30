@@ -15,7 +15,7 @@
     <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <block>
-                
+
             </block>
             <a class="navbar-item" href="http://laonpeople.com" style="width:150px;height: 80px;">
                 <img src="/static/logo.png" width='100%' height='100%'>
@@ -44,7 +44,7 @@
                 <a class="navbar-item">
                     DMS Settings
                 </a>
-                <a class="navbar-item">
+                <a class="navbar-item" href="/timesetting">
                     Time
                 </a>
                 <a class="navbar-item">
@@ -55,13 +55,13 @@
         </div>
     </nav>
     <block>
-    <!-- <nav class="breadcrumb has-arrow-separator" aria-label="breadcrumbs">
+        <!-- <nav class="breadcrumb has-arrow-separator" aria-label="breadcrumbs">
         <ul>
             <li><a href="#">&nbsp;&nbsp;&nbsp;Home</a></li>
             <li class='is-active'><a href="#">Live Viewer</a></li>
         </ul>
     </nav> -->
-</block>
+    </block>
     <div class="modal">
         <div class="modal-background"></div>
         <div class="modal-card">
@@ -81,8 +81,7 @@
 
 
 
-
-
+    <!-- Admin Setting -->
     <section class="hero is-white is-fullheight">
         <div class="hero-body">
             <div class="container">
@@ -104,33 +103,53 @@
             </div>
         </div>
     </section>
-
+    <!-- Start Time -->
     <section class="hero is-warning is-fullheight">
         <div class="hero-body">
             <div class="container">
                 <div class="columns is-centered">
                     <div class="column is-half">
-
-                        
-
                         <article class="message">
                             <div class="message-header">
-                              <p>Current Time</p>
-                              <button class="button is-link">Change</button>
+                                <p>Current Time</p>
+                                <button id='ctimebtn' class="button is-link">Change</button>
                             </div>
-                            <div class="message-body">
-                                <strong>
-                                    2021-02-01 01:00:01 (KST)
-                                </strong>
+                            <div id='curtime_text' class="message-body">
+                                <strong>&nbsp;</strong>
                             </div>
-                          </article>
+                        </article>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-
+    <div id='time_setting' class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">System Time</p>
+                <button class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="field">
+                    <label class="label">Time to apply</label>
+                    <div class="control has-icons-left has-icons-right">
+                        <input id='systime' class="input" type="text" name="systime" placeholder="Apply your time">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-clock"></i>
+                        </span>
+                    </div>
+                </div>
+            </section>
+            <footer class="modal-card-foot">
+                <button class="button is-success" onclick="updateTimeReq();">Save changes</button>
+                <button class="button" onclick='$("#time_setting").removeClass("is-active");'>Cancel</button>
+            </footer>
+        </div>
+    </div>
+    <!-- End Time  -->
+    <!-- System Info. -->
     <section class="hero is-primary is-fullheight">
         <div class="hero-body">
             <div class="container">
@@ -189,6 +208,7 @@
             </div>
         </div>
     </section>
+    <!-- DMS Settings  -->
     <section class='hero is-success is-fullheight'>
         <div class="hero-body">
             <div class="container">
@@ -282,6 +302,44 @@
         });
     });
 
+    // Time Setting
+
+    function updateCurtime() {
+        $.get("/api/curtime", function (data, status) {
+            var d = new Date(parseFloat(data * 1000))
+            const offset = d.getTimezoneOffset()
+            var yourDate = new Date(d.getTime() - (offset * 60 * 1000))
+            $('#curtime_text').html('<strong>' + yourDate.toISOString().split('T')[0] + ' ' + yourDate.toISOString().split('T')[1].substring(0, 8) + '</strong>')
+        });
+    }
+
+    $("#ctimebtn").click(function () {
+        $("#systime:text").val($('#curtime_text').text());
+        $("#time_setting").addClass("is-active");
+        $('html').toggleClass('is-clipped');
+    });
+
+    $(document).ready(function () {
+        setInterval(updateCurtime, 1000);
+    });
+
+    function updateTimeReq() {
+        var targetTimeStr = $("#systime:text").val()
+        var targetTime = Date.parse(targetTimeStr)
+        $.post("/api/updatetime", { targetTime: targetTime })
+            .done(function (data) {
+                var d = new Date(parseInt(data))
+                console.log(d.toLocaleString())
+                alert("Date changed successfully.")
+            }).fail(function (err) {
+                alert("Date change failed")
+            }).always(() => {
+                $(".modal").removeClass("is-active");
+            })
+    }
+
+
+
     function toggleModalClasses(event) {
         //     var modalId = event.currentTarget.dataset.modalId;
         //     var modal = $(modalId);
@@ -291,6 +349,10 @@
     };
 
     $(".modal-close").click(function () {
+        $(".modal").removeClass("is-active");
+    });
+
+    $(".delete").click(function () {
         $(".modal").removeClass("is-active");
     });
 

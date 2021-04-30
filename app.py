@@ -1,3 +1,5 @@
+import os
+
 from flask import (
     Flask,
     g,
@@ -6,10 +8,13 @@ from flask import (
     request,
     session,
     url_for,
-    jsonify
+    jsonify,
+    json
 )
 
 from datetime import datetime
+
+SYS_INFO="/Users/bongkyo/git/bnd/camr/sysinfo.json"
 
 class User:
     def __init__(self, id, username, password):
@@ -73,7 +78,12 @@ def systeminfo():
     if not g.user:
         return redirect(url_for('login'))
     
-    return render_template('systeminfo.html')
+    # SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+    # json_url = os.path.join(SITE_ROOT, "static/data", "taiwan.json")
+    # data = json.load(open(json_url))
+    data = json.load(open(SYS_INFO))
+
+    return render_template('systeminfo.html', jsonObj=data)
 
 @app.route('/dmssetting', methods=['GET', 'POST'])
 def dmssetting():
@@ -113,6 +123,13 @@ def test():
 @app.route('/api/curtime')
 def curtime():
     return jsonify(datetime.now().timestamp())
+
+
+@app.route('/api/updatetime', methods=['POST'])
+def updatetime():
+    targetTime = request.form['targetTime']
+    return jsonify(targetTime)
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
