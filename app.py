@@ -5,7 +5,8 @@ from flask import (
     render_template,
     request,
     session,
-    url_for
+    url_for,
+    jsonify
 )
 
 from datetime import datetime
@@ -25,8 +26,14 @@ users.append(User(id=2, username='bnd', password='bnd1234'))
 
 
 
+# app = Flask(__name__, static_url_path='')
 app = Flask(__name__)
 app.secret_key = 'somesecretkeythatonlyishouldknow'
+
+
+@app.route('/js/<path:path>')
+def send_js(path):
+    return send_from_directory('js', path)
 
 @app.before_request
 def before_request():
@@ -102,6 +109,10 @@ def test():
         return redirect(url_for('login'))
     
     return render_template('test.html')
+
+@app.route('/api/curtime')
+def curtime():
+    return jsonify(datetime.now().timestamp())
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
