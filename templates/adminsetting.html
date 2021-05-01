@@ -69,11 +69,19 @@
           <div class="column is-half">
             <article class="message">
               <div class="message-header">
-                <p>Current Time</p>
-                <button id='ctimebtn' class="button is-link">Change</button>
+                <p>Password</p>
               </div>
               <div id='curtime_text' class="message-body">
-                <strong>Loading Device Time ...</strong>
+                <div class='container'>
+                  <div class='columns'>
+                    <div class='column is-half'>
+                      <button id='reset_btn' class="button is-danger is-fullwidth">Reset</button>
+                    </div>
+                    <div class='column is-half'>
+                      <button id='change_btn' class="button is-success is-fullwidth">Change</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </article>
           </div>
@@ -82,26 +90,27 @@
     </div>
   </section>
 
-  <div id='time_setting' class="modal">
+  <div id='update_pass' class="modal">
     <div class="modal-background"></div>
     <div class="modal-card">
       <header class="modal-card-head">
-        <p class="modal-card-title">System Time</p>
+        <p class="modal-card-title">Change Password</p>
         <button class="delete" aria-label="close"></button>
       </header>
       <section class="modal-card-body">
         <div class="field">
-          <label class="label">Time to apply</label>
+          <label class="label">New Password</label>
           <div class="control has-icons-left has-icons-right">
-            <input id='systime' class="input" type="text" name="systime" placeholder="Apply your time">
+            <input id='new_pass' class="input" type="password" name="new_pass"
+              placeholder="Enter New Password(at least 8)">
             <span class="icon is-small is-left">
-              <i class="fas fa-clock"></i>
+              <i class="fas fa-key"></i>
             </span>
           </div>
         </div>
       </section>
       <footer class="modal-card-foot">
-        <button class="button is-success" onclick="updateTimeReq();">Save changes</button>
+        <button id='saveBtn' class="button is-success" onclick="updatePassReq();">Save changes</button>
         <button class="button"
           onclick='$("#time_setting").removeClass("is-active");$("html").toggleClass("is-clipped");'>Cancel</button>
       </footer>
@@ -120,7 +129,7 @@
       $(".navbar-menu").toggleClass("is-active");
     });
   });
-\
+
   function toggleModalClasses(event) {
     $(".modal").addClass("is-active");
     $('html').toggleClass('is-clipped');
@@ -137,6 +146,42 @@
 
   $('.open-modal').click(toggleModalClasses);
   $('.close-modal').click(toggleModalClasses);
+
+  $("#reset_btn").click(function () {
+    var ans = confirm("Are you sure to reset password?");
+    if (ans) {
+      $.post("/api/resetpass")
+        .done(function (data) {
+          console.log("Password reset successfully.")
+        }).fail(function (err) {
+          alert("Date change failed")
+        })
+    }
+  });
+
+
+  $("#change_btn").click(function () {
+    $("#update_pass").addClass("is-active");
+    $('html').toggleClass('is-clipped');
+  });
+
+
+
+  function updatePassReq() {
+    var targetPass = $("#new_pass").val()
+    alert(targetPass)
+    $.post("/api/updatepass", { targetPass: targetPass })
+      .done(function (data) {
+        alert("Password changed successfully.")
+      }).fail(function (err) {
+        alert("Failed password update.")
+      }).always(() => {
+        $(".modal").removeClass("is-active");
+        $('html').toggleClass('is-clipped');
+      })
+  }
+
+
 </script>
 
 </html>

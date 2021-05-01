@@ -14,6 +14,8 @@ from flask import (
 
 from datetime import datetime
 
+RESET_TO='admin1234'
+USER_CONF="/Users/bongkyo/git/bnd/camr/config.json"
 SYS_INFO="/Users/bongkyo/git/bnd/camr/sysinfo.json"
 
 class User:
@@ -129,6 +131,23 @@ def curtime():
 def updatetime():
     targetTime = request.form['targetTime']
     return jsonify(targetTime)
+
+@app.route('/api/resetpass', methods=['POST'])
+def resetpass():
+    data = json.load(open(USER_CONF))
+    data['admin'] = RESET_TO
+    with open(USER_CONF, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    return jsonify("OK")
+
+@app.route('/api/updatepass', methods=['POST'])
+def updatepass():
+    passwd = request.form['targetPass']
+    data = json.load(open(USER_CONF))
+    data['admin'] = passwd
+    with open(USER_CONF, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    return jsonify("OK")
 
 
 if __name__ == "__main__":
