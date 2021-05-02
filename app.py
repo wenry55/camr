@@ -16,6 +16,7 @@ from datetime import datetime
 
 RESET_TO='admin1234'
 USER_CONF="/Users/bongkyo/git/bnd/camr/config.json"
+DMS_CONF="/Users/bongkyo/git/bnd/camr/dmsconfig.json"
 SYS_INFO="/Users/bongkyo/git/bnd/camr/sysinfo.json"
 
 class User:
@@ -37,6 +38,20 @@ users.append(User(id=2, username='bnd', password='bnd1234'))
 app = Flask(__name__)
 app.secret_key = 'somesecretkeythatonlyishouldknow'
 
+def is_on(val):
+    if val == 1:
+        return 'is-success'
+    else:
+        return ''
+
+def get_sensitivity(val, curlevel):
+    if val == curlevel:
+        return 'is-success'
+    else:
+        return ''
+
+app.jinja_env.globals.update(is_on=is_on)
+app.jinja_env.globals.update(get_sensitivity=get_sensitivity)
 
 @app.route('/js/<path:path>')
 def send_js(path):
@@ -92,10 +107,9 @@ def dmssetting():
     if not g.user:
         return redirect(url_for('login'))
 
-
-
+    data = json.load(open(DMS_CONF))
     
-    return render_template('dmssetting.html')
+    return render_template('dmssetting.html', jsonObj=data)
 
 @app.route('/timesetting', methods=['GET', 'POST'])
 def timesetting():
@@ -147,6 +161,16 @@ def updatepass():
     data['admin'] = passwd
     with open(USER_CONF, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+    return jsonify("OK")
+
+
+@app.route('/api/update_dms_conf', methods=['POST'])
+def update_dms_conf():
+
+    dmsConfig = request.form['dmsConfig']
+
+    with open(DMS_CONF, 'w', encoding='utf-8') as f:
+        json.dump(dmsConfig, f, ensure_ascii=False, indent=4)
     return jsonify("OK")
 
 
