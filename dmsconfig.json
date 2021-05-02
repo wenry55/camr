@@ -1,9 +1,9 @@
 {
-    "dms": 0,
+    "dms": 1,
+    "dms_sensitivity": "low",
+    "dms_speed": 45,
+    "gsensor_sensitivity": "low",
+    "led_brightness": 50,
     "psr": 1,
-    "dms_speed": 30,
-    "dms_sensitivity": "high",
-    "volume": 60,
-    "led_brightness": 80,
-    "gsensor_sensitivity": "low"
+    "volume": 75
 }

@@ -9,9 +9,11 @@ from flask import (
     session,
     url_for,
     jsonify,
-    json
+    json,
+    Response
 )
-
+from importlib import import_module
+from camera_v4l2 import Camera
 from datetime import datetime
 
 RESET_TO='admin1234'
@@ -29,8 +31,13 @@ class User:
         return f'<User: {self.username}>'
 
 users = []
-users.append(User(id=1, username='admin', password='laon1234'))
-users.append(User(id=2, username='bnd', password='bnd1234'))
+users.append(User(id=1, username='laon', password='laon1234'))
+
+usersObj = json.load(open(USER_CONF))
+users.append(User(id=2, username='admin', password=usersObj['admin']))
+
+
+
 
 
 
@@ -167,11 +174,33 @@ def updatepass():
 @app.route('/api/update_dms_conf', methods=['POST'])
 def update_dms_conf():
 
-    dmsConfig = request.form['dmsConfig']
-
+    dmsConfig = {}
+    dmsConfig['dms'] = int(request.form['dms'])
+    dmsConfig['psr'] = int(request.form['psr'])
+    dmsConfig['dms_speed'] = int(request.form['dms_speed'])
+    dmsConfig['dms_sensitivity'] = request.form['dms_sensitivity']
+    dmsConfig['volume'] = int(request.form['volume'])
+    dmsConfig['led_brightness'] = int(request.form['led_brightness'])
+    dmsConfig['gsensor_sensitivity'] = request.form['gsensor_sensitivity']
+    print(dmsConfig)
     with open(DMS_CONF, 'w', encoding='utf-8') as f:
         json.dump(dmsConfig, f, ensure_ascii=False, indent=4)
     return jsonify("OK")
+
+
+def gen(camera):
+    """Video streaming generator function."""
+    while True:
+        frame = camera.get_frame()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+
+@app.route('/video_feed')
+def video_feed():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(gen(Camera()),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == "__main__":

@@ -79,7 +79,7 @@
               </div>
             </div>
             <div class='field'>
-              <label class="label" style='color:antiquewhite'>DMS Car Speed Limit (인식 차량 속도 km/h)</label>
+              <label class="label" style='color:antiquewhite'>DMS Car Speed Limit (Max 60 km/h)</label>
               <div>
                 <input id="sliderSpeed" style='width: 100%;' class="slider is-success has-output is-fullwidth" min="0"
                   max="60" value="{{jsonObj.dms_speed}}" step="1" type="range">
@@ -99,7 +99,7 @@
             </div>
 
             <div class='field'>
-              <label class="label" style='color:antiquewhite'>Audio Volume</label>
+              <label class="label" style='color:antiquewhite'>Audio Volume (0/25/50/75/100)</label>
               <div>
                 <input id="sliderAudio" style='width: 100%;' class="slider is-success has-output is-fullwidth" min="0"
                   max="100" value="{{jsonObj.volume}}" step="25" type="range">
@@ -120,9 +120,9 @@
                 <button id='btnGSenseLow'
                   class="button {{get_sensitivity(jsonObj.gsensor_sensitivity, 'low')}}">Low</button>
                 <button id='btnGSenseMed'
-                  class="button {{get_sensitivity(jsonObj.gsensor_sensitiviey, 'medium')}}">Medium</button>
+                  class="button {{get_sensitivity(jsonObj.gsensor_sensitivity, 'medium')}}">Medium</button>
                 <button id='btnGSenseHigh'
-                  class="button {{get_sensitivity(jsonObj.gsensor_sensitiviey, 'high')}}">High</button>
+                  class="button {{get_sensitivity(jsonObj.gsensor_sensitivity, 'high')}}">High</button>
               </div>
             </div>
           </div>
@@ -251,11 +251,11 @@
     console.log(dmsConfig)
 
 
-    $.post("/api/update_dms_conf", { dmsConfig: dmsConfig })
+    $.post("/api/update_dms_conf", { ...dmsConfig })
       .done(function (data) {
-        alert("Password changed successfully.")
+        console.log('dms config changed successfully.')
       }).fail(function (err) {
-        alert("Failed password update.")
+        alert("Failed update.")
       })
 
 
